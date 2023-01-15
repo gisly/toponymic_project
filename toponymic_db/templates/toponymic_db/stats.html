@@ -1,0 +1,26 @@
+{% load googlecharts %}
+
+<div id="count_graph"></div>
+
+{% googlecharts %}
+	{% data values "count" %}
+		{% col "string" "MotivationEn" %}"{{ val }}"{% endcol %}
+		{% col "number" "Number of locations by motivations" %}{{ val }}{% endcol %}
+	{% enddata %}
+
+	{% options %}
+		kind: "BarChart",
+		options: {
+			backgroundColor: "#ffffff",
+			colors: ["peru"],
+			gridlineColor: "#ddd",
+			legend: "top",
+			vAxis: {minValue: 0},
+			chartArea: {left: 150, top: 20, width: 700, height: 500},
+			width: 700,
+			height: 600
+		}
+	{% endoptions %}
+
+	{% graph "count_graph" "count" %}
+{% endgooglecharts %}
