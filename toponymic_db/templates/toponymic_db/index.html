@@ -1,40 +1,25 @@
 {% load static %}
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+     integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+     crossorigin=""/>
 <link rel="stylesheet" type="text/css" href="{% static 'toponymic_db/style.css' %}">
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+     integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+     crossorigin=""></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
-<script src="{% static 'toponymic_db/js/table.js' %}" type="text/javascript"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gokertanrisever/leaflet-ruler@master/src/leaflet-ruler.css" integrity="sha384-P9DABSdtEY/XDbEInD3q+PlL+BjqPCXGcF8EkhtKSfSTr/dS5PBKa9+/PMkW2xsY" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/gh/gokertanrisever/leaflet-ruler@master/src/leaflet-ruler.js" integrity="sha384-N2S8y7hRzXUPiepaSiUvBH1ZZ7Tc/ZfchhbPdvOE5v3aBBCIepq9l+dBJPFdo1ZJ" crossorigin="anonymous"></script>
+<script src="{% static 'toponymic_db/js/map_viewer.js' %}" type="text/javascript"></script>
 
-<button title="Clear" onclick="clear_filter()">Clear all filters</button>
-<a href="{% url 'toponymic_db:stats' %}">Statistics for name distribution</a>
-<table id="toponymic_db" class="display">
-    <thead>
-        <tr>
-            <th>Geoname</th>
-            <th>Name translation (ru)</th>
-            <th>Motivation comment</th>
-            <th class="select-filter">Linguistic means</th>
-            <th class="select-filter">Motivation</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in geonames %}
-        <tr>
-            <td><a href="{% url 'toponymic_db:detail' item.geoname_id %}"> {{ item.geoname }}</a></td>
-            <td>{{ item.name_translation_ru }}</td>
-            <td>{{ item.motivation_comment }}</td>
-            <td>{{ item.linguistic_means|default_if_none:"" }}</td>
-            <td>{{ item.motivation_id }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-    <tfoot>
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    </tfoot>
-</table>
+
+<body>
+<script>
+geonames = {{geonames|safe}};
+geoobjects = {{geoobjects|safe}};
+</script>
+
+
+<div id="map" style="height: 800px;"></div>
+
+
+</body>

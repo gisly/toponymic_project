@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'toponymic_db.apps.ToponymicDbConfig',
-    #'googlecharts',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -72,31 +71,17 @@ WSGI_APPLICATION = 'toponymic.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-"""
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'geoterms',
-        'USER': 'postgres',
-        'PASSWORD': 'password',
+        'USER': 'app',
+        'PASSWORD': 'rfrfyl.babaloos',
         'HOST': '127.0.0.1',
-        'PORT': '5433',
-    }
-}
-"""
-
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'geoterms',
-        'USER': 'postgres',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
-
 
 
 # Password validation

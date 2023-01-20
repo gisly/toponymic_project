@@ -1,6 +1,25 @@
 .geo-feature{
     background-color: #f6f6f6;
 }
+.table_rubric{
+    font-weight: bold;
+}
 #toponymic_db{
     display: none
+}
+
+
+.column-bordered-table {
+  white-space: nowrap;
+  width: 100%;
+}
+
+
+.column-bordered-table td {
+    width: 0;
+    min-width: fit-content;
+}
+
+.column-bordered-table td.table-data {
+    border-left: 1px solid #c3c3c3;
 }
