@@ -55,8 +55,6 @@ function fillInObjects() {
     initializeActionsOnMarkers();
     var bounds = new L.LatLngBounds(latLngs);
     map.fitBounds(bounds);
-    console.log(markersByMapId);
-
 }
 
 function initializeUtils() {
@@ -113,6 +111,7 @@ function fillInObject(geoname, geoobject, geomap) {
 
 
 function generatePopupTable(geoname, geoobject, geomap) {
+    console.log(geoobject.fields['geotype_id']);
     var geotype = getGeotypeById(geoobject.fields['geotype_id']);
     var geolanguage = getLanguageById(geoname.fields['language_id']);
     var geonameName = geoname.fields['geoname'];
@@ -183,7 +182,6 @@ function generateMapPopupTable(currentMapId){
 function generateMapPopupTableRow(idFromMap){
     var geoobject = geoobjects[idFromMap];
     var geoname = geonames[idFromMap];
-    var geomap = geomaps[idFromMap];
     var geotype = getGeotypeById(geoobject.fields['geotype_id']);
     var geolanguage = getLanguageById(geoname.fields['language_id']);
     var geonameName = geoname.fields['geoname'];
@@ -192,7 +190,8 @@ function generateMapPopupTableRow(idFromMap){
     }
     var replacementData = {
         "geoname": geonameName,
-        "geotype": geotype
+        "geotype": geotype,
+        "number_on_map": geoname.fields['number_on_map']
     };
     return replaceMe(POPUP_MAP_TABLE_ROW, replacementData);
 }
@@ -243,19 +242,19 @@ const POPUP_TABLES = ["<table class='column-bordered-table'>" +
 ]
 
 
-const POPUP_MAP_TABLES = ["<table class='column-bordered-table'>" +
-                           "<tr><th class='table-data-first-column'>Тип</th><th class='table-data'>Название</th</tr>",
+const POPUP_MAP_TABLES = ["<table class='column-bordered-table'><tbody class='scrollable'>" +
+                           "<tr><th class='table-data-first-column'>Номер на карте</th><th class='table-data'>Тип</th><th class='table-data'>Название</th></tr>",
 
-                           "<table class='column-bordered-table'>" +
-                           "<tr><th class='table-data-first-column'>Type</th><th class='table-data'>Title</th></tr>"
+                           "<table class='column-bordered-table'><tbody class='scrollable>" +
+                           "<tr><th class='table-data-first-column'>Number on the map</th><th class='table-data'>Type</th><th class='table-data'>Title</th></tr>"
 ]
 
-const POPUP_MAP_TABLE_ROW = "<tr><td class='table-data-first-column'>{geotype}</td><td class='table-data'>{geoname}</td></tr>"
-const POPUP_MAP_TABLE_ROW_LAST = [ "<tr><td class='table-rubric'></td><td><div class='refresh-all-markers'>Вернуться к просмотру</div></td></tr></table>" ,
-                        "<tr><td class='table-rubric'></td><td><div class='refresh-all-markers'>Return to the common view</div></td></tr></table>"]
+const POPUP_MAP_TABLE_ROW = "<tr><td class='table-data-first-column'>{number_on_map}</td><td class='table-data'>{geotype}</td><td class='table-data'>{geoname}</td></tr>"
+const POPUP_MAP_TABLE_ROW_LAST = [ "<tr><td class='table-rubric'></td><td><div class='refresh-all-markers'>Вернуться к просмотру</div></td></tr></tbody></table>" ,
+                        "<tr><td class='table-rubric'></td><td><div class='refresh-all-markers'>Return to the common view</div></td></tr></tbody></table>"]
 
-const POPUP_MAP_TABLE_ROW_IMAGE = ["<tr><td colspan='2'><a href='{image_link}' target='_blank'><img width='500' src='{image_link}' alt='Карта'/></a></td></tr>",
-                                    "<tr><td colspan='2'><a href='{image_link}' target='_blank'><img width='500' src='{image_link}' alt='Map'/></a></td></tr>"];
+const POPUP_MAP_TABLE_ROW_IMAGE = ["<tr><td colspan='3'><a href='{image_link}' target='_blank'><img width='500' src='{image_link}' alt='Карта'/></a></td></tr>",
+                                    "<tr><td colspan='3'><a href='{image_link}' target='_blank'><img width='500' src='{image_link}' alt='Map'/></a></td></tr>"];
 
 const RULER_OPTIONS = [{
         position: 'bottomleft',
@@ -316,10 +315,32 @@ function isLatinScript(currentLanguage) {
 }
 
 const GEOTYPES = {
-    "1": ["река", "river"]
+    "1": ["река", "river"],
+    "2": ["гора", "mountain"],
+    "3": ["населенный пункт", "settlement"],
+    "4": ["священное место", "sacred place"],
+    "5": ["песчаная коса", "sand bar"],
+    "6": ["мыс", "cape"],
+    "7": ["залив", "bay"],
+    "8": ["неизвестно", "unknown"],
+    "9": ["озеро", "lake"],
+    "10": ["возвышенность", "elevation"],
+    "11": ["сопка", "sopka"],
+    "12": ["распадок", "glen"],
+    "13": ["море", "sea"],
+    "14": ["остров", "island"],
+    "15": ["экотоп", "ecotope"],
+    "16": ["горный перевал", "mountain passage"],
+    "17": ["пещера", "cave"],
+    "18": ["болотистая местность", "marshes"],
+    "19": ["лес", "forest"]
 }
 const GEOLANGUAGES = {
-    "1": ["эвенкийский", "Evenki"]
+    "1": ["эвенкийский", "Evenki"],
+    "2": ["якутский", "Sakha"],
+    "3": ["русский", "Russian"],
+    "4": ["бурятский", "Buryat"],
+    "5": ["неизвестно", "unknown"]
 }
 const LANGUAGES = ["RU", "EN"]
 

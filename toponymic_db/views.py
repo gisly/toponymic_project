@@ -14,7 +14,7 @@ class IndexView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         geonames = GeoNames.objects.select_related('source_id', 'motivation_id', 'geoobject_id', 'map_id').exclude(
-            geoobject_id__latitude=0)
+            geoobject_id__latitude=0).order_by('geoname_id')
         print(geonames.query)
         context = super(IndexView, self).get_context_data(**kwargs)
         context['geonames'] = serializers.serialize('json', geonames)

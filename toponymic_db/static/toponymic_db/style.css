@@ -30,6 +30,7 @@
 
 .column-bordered-table td.table-data-first-column {
     padding : 10px;
+    text-align: right !important
 }
 
 .table-comment {
@@ -50,4 +51,15 @@
     font-style: normal;
     cursor: pointer;
     text-align: right !important
+}
+
+thead,
+tbody {
+  display: block;
+}
+
+.scrollable{
+  height: 400px;
+  width: 700px;
+  overflow: auto;
 }

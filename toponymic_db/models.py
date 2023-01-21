@@ -19,11 +19,6 @@ class SourceReferences(models.Model):
         return self.source_full_description
 
 
-class Editors(models.Model):
-    editor_id = models.AutoField(primary_key=True, null=False)
-    editor_information = models.TextField()
-
-
 class MotivationTypes(models.Model):
     motivation_id = models.AutoField(primary_key=True)
     motivation_short_name_ru = models.CharField(max_length=100, unique=True, null=False)
@@ -99,7 +94,7 @@ class GeoObjects(models.Model):
     osm_id = models.IntegerField(primary_key=False, unique=False)
     geotype_id = models.ForeignKey(GeoTypes, on_delete=models.SET_NULL, null=True, blank=True)
     map_id = models.ForeignKey(Maps, on_delete=models.SET_NULL, null=True, blank=True)
-    editor_id = models.ForeignKey(Editors, on_delete=models.SET_NULL, null=True, blank=True)
+    editor_id = models.ForeignKey(Persons, on_delete=models.SET_NULL, null=True, blank=True)
     is_duplicate = models.IntegerField(null=True, blank=True)
     is_coordinates_approximate = models.BooleanField(null=False, blank=False, default=False)
     date_added = models.DateTimeField(null=True, blank=True)
@@ -124,6 +119,7 @@ class GeoNames(models.Model):
     source_id = models.ForeignKey(SourceReferences, on_delete=models.SET_NULL, null=True, blank=True)
     motivation_id = models.ForeignKey(MotivationTypes, on_delete=models.SET_NULL, null=True, blank=True)
     map_id = models.ForeignKey(Maps, on_delete=models.SET_NULL, null=True, blank=True)
+    number_on_map = models.CharField(max_length=10, unique=False, null=True, blank=True)
 
     def __str__(self):
         return self.geoname
