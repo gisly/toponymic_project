@@ -46,10 +46,30 @@ class GeoTypes(models.Model):
         return self.geotype_description_en
 
 
+class Persons(models.Model):
+    person_id = models.AutoField(primary_key=True, null=False)
+    first_name = models.TextField(null=False, blank=False)
+    patronymic = models.TextField(null=True, blank=True)
+    last_name = models.TextField(null=False, blank=False)
+    comment = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        full_name = str(self.first_name)
+        if self.patronymic:
+            full_name += ' ' + str(self.patronymic)
+        full_name += ' ' + str(self.last_name)
+        return full_name
+
+
 class Maps(models.Model):
     map_id = models.AutoField(primary_key=True)
     area_name_ru = models.CharField(max_length=200, unique=True, null=False)
     area_name_en = models.CharField(max_length=200, unique=True, null=False)
+    author_id = models.ForeignKey(Persons, on_delete=models.SET_NULL, null=True, blank=True, related_name='%(class)s_author')
+    collector_id = models.ForeignKey(Persons, on_delete=models.SET_NULL, null=True, blank=True, related_name='%(class)s_collector')
+    date_collected = models.DateField(null=True, blank=True)
+    place_collected = models.TextField(null=True, blank=True)
+    image_link = models.URLField(null=True, blank=True)
 
     def __str__(self):
         return self.area_name_en
@@ -103,25 +123,10 @@ class GeoNames(models.Model):
     geoobject_id = models.ForeignKey(GeoObjects, on_delete=models.SET_NULL, null=True, blank=True)
     source_id = models.ForeignKey(SourceReferences, on_delete=models.SET_NULL, null=True, blank=True)
     motivation_id = models.ForeignKey(MotivationTypes, on_delete=models.SET_NULL, null=True, blank=True)
+    map_id = models.ForeignKey(Maps, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.geoname
-
-
-class Persons(models.Model):
-    person_id = models.AutoField(primary_key=True, null=False)
-    first_name = models.TextField(null=False, blank=False)
-    patronymic = models.TextField(null=False, blank=False)
-    last_name = models.TextField(null=False, blank=False)
-    comment = models.TextField(null=True, blank=True)
-
-    @property
-    def __str__(self):
-        full_name = str(self.first_name)
-        if self.patronymic:
-            full_name += ' ' + str(self.patronymic)
-        full_name += ' ' + str(self.last_name)
-        return full_name
 
 
 class GeoNarrations(models.Model):

@@ -27,3 +27,27 @@
     padding : 10px;
     font-weight: bold;
 }
+
+.column-bordered-table td.table-data-first-column {
+    padding : 10px;
+}
+
+.table-comment {
+    font-style: italic;
+}
+
+.show-all-markers {
+    color: blue;
+    text-decoration: underline;
+    font-style: normal;
+    cursor: pointer;
+    text-align: right !important
+}
+
+.refresh-all-markers {
+    color: blue;
+    text-decoration: underline;
+    font-style: normal;
+    cursor: pointer;
+    text-align: right !important
+}

@@ -4,7 +4,7 @@ from django.core import serializers
 from django.db.models import Count
 from django.shortcuts import render
 from django.views import generic
-from .models import GeoNames, GeoObjects
+from .models import GeoNames, GeoObjects, Maps
 from .models import MotivationTypes
 
 
@@ -13,12 +13,13 @@ class IndexView(generic.TemplateView):
     context_object_name = 'geonames'
 
     def get_context_data(self, **kwargs):
-        geonames = GeoNames.objects.select_related('source_id', 'motivation_id', 'geoobject_id').exclude(
+        geonames = GeoNames.objects.select_related('source_id', 'motivation_id', 'geoobject_id', 'map_id').exclude(
             geoobject_id__latitude=0)
         print(geonames.query)
         context = super(IndexView, self).get_context_data(**kwargs)
         context['geonames'] = serializers.serialize('json', geonames)
         context['geoobjects'] = serializers.serialize('json', [geoname.geoobject_id for geoname in geonames])
+        context['geomaps'] = serializers.serialize('json', [geoname.map_id if geoname.map_id is not None else Maps() for geoname in geonames if geoname ])
         return context
 
 

@@ -1,11 +1,15 @@
 var geonames;
 var geoobjects;
+var geomaps;
 var latLngs = Array();
 var map;
 var ruler;
 var currentLanguage = 0;
 
-var markers = []
+
+var markers = [];
+var markersByMapId = new Object();
+
 $(document).ready(function() {
     initializeMap();
     fillInObjects();
@@ -34,12 +38,24 @@ function initializeMap() {
 
 function fillInObjects() {
     for (let i = 0; i < geonames.length; i++) {
-        var geoname = geonames[i]
-        var geoobject = geoobjects[i]
-        fillInObject(geoname, geoobject)
+        var geoname = geonames[i];
+        var geoobject = geoobjects[i];
+        var geomap = geomaps[i];
+        var geomapId = geomap.pk;
+        if (!!geomapId){
+            if(geomapId in markersByMapId){
+                markersByMapId[geomapId].push(i);
+            } else {
+                markersByMapId[geomapId] = [i];
+            }
+
+        }
+        fillInObject(geoname, geoobject, geomap)
     }
+    initializeActionsOnMarkers();
     var bounds = new L.LatLngBounds(latLngs);
     map.fitBounds(bounds);
+    console.log(markersByMapId);
 
 }
 
@@ -50,7 +66,7 @@ function initializeUtils() {
             currentLanguage = 0;
         }
         $(this).html(LANGUAGES[currentLanguage]);
-        switchPopups();
+        refreshPopups();
         switchMenu();
     });
 
@@ -59,12 +75,14 @@ function initializeUtils() {
     });
 }
 
-function switchPopups() {
+function refreshPopups() {
     for (let i = 0; i < geonames.length; i++) {
         var geoname = geonames[i];
         var geoobject = geoobjects[i];
+        var geomap = geomaps[i];
         var marker = markers[i];
-        marker.bindPopup(generatePopupTable(geoname, geoobject), {
+        marker .setStyle({color: "red", radius: 7, fillColor: "red", fillOpacity: "0.2"});
+        marker.bindPopup(generatePopupTable(geoname, geoobject, geomap), {
             maxWidth: 1000
         });
     }
@@ -74,7 +92,7 @@ function switchMenu(){
     $("#listView").html(MENU_LIST_VIEW[currentLanguage]);
 }
 
-function fillInObject(geoname, geoobject) {
+function fillInObject(geoname, geoobject, geomap) {
     var latitude = geoobject.fields['latitude']
     var longitude = geoobject.fields['longitude']
     var marker = new L.CircleMarker([latitude, longitude], {
@@ -82,15 +100,90 @@ function fillInObject(geoname, geoobject) {
         color: "red"
     });
     marker.addTo(map);
-    marker.bindPopup(generatePopupTable(geoname, geoobject), {
+    marker.bindPopup(generatePopupTable(geoname, geoobject, geomap), {
         maxWidth: 1000
     });
+
+    if(!!geomap.pk){
+        marker.mapId = geomap.pk;
+    }
     latLngs.push([latitude, longitude]);
     markers.push(marker);
 }
 
 
-function generatePopupTable(geoname, geoobject) {
+function generatePopupTable(geoname, geoobject, geomap) {
+    var geotype = getGeotypeById(geoobject.fields['geotype_id']);
+    var geolanguage = getLanguageById(geoname.fields['language_id']);
+    var geonameName = geoname.fields['geoname'];
+    if (isLatinScript(currentLanguage)) {
+        geonameName = transliterate(geonameName);
+    }
+
+    var mapDescription = geomap.fields.area_name_ru;
+    if (isLatinScript(currentLanguage)) {
+        mapDescription = geomap.fields.area_name_en;
+    }
+    var replacementData = {
+        "geoname": geonameName,
+        "name_translation_ru": geoname.fields['name_translation_ru'],
+        "name_translation_en": geoname.fields['name_translation_en'],
+        "geotype": geotype,
+        "geolanguage": geolanguage,
+        "map_description": mapDescription,
+        "map_id": geomap.pk
+    };
+    return replaceMe(POPUP_TABLES[currentLanguage], replacementData);
+}
+
+
+
+
+
+function initializeActionsOnMarkers(){
+   $("div#map").on("click", '.show-all-markers', function (e) {
+        var currentMapId = e.target.id;
+        if(!!currentMapId){
+            var markerIdsFromThisMap = markersByMapId[currentMapId];
+            markerIdsFromThisMap.forEach(function(markerId){
+                markers[markerId].setStyle({color: "black", fillColor: "#FDBE02", fillOpacity: "1", radius: 10});
+                markers[markerId].bindPopup(generateMapPopupTable(currentMapId), {maxWidth: 1000});
+            })
+            map.closePopup();
+
+            markers[markerIdsFromThisMap[0]].openPopup();
+        }
+    });
+
+    $("div#map").on("click", '.refresh-all-markers', function (e) {
+        refreshPopups();
+        map.closePopup();
+    });
+}
+
+
+function generateMapPopupTable(currentMapId){
+    var table = POPUP_MAP_TABLES[currentLanguage];
+    var idsByMapId = markersByMapId[currentMapId];
+    idsByMapId.forEach(function(idFromMap){
+        table += generateMapPopupTableRow(idFromMap);
+    })
+    //add a picture of the map if exists
+    var geomap = geomaps[idsByMapId[0]];
+    if(!!geomap.fields.image_link){
+        var replacementData = {
+            "image_link": geomap.fields.image_link
+        };
+        table +=  replaceMe(POPUP_MAP_TABLE_ROW_IMAGE[currentLanguage], replacementData);
+    }
+    table += POPUP_MAP_TABLE_ROW_LAST[currentLanguage];
+    return table;
+}
+
+function generateMapPopupTableRow(idFromMap){
+    var geoobject = geoobjects[idFromMap];
+    var geoname = geonames[idFromMap];
+    var geomap = geomaps[idFromMap];
     var geotype = getGeotypeById(geoobject.fields['geotype_id']);
     var geolanguage = getLanguageById(geoname.fields['language_id']);
     var geonameName = geoname.fields['geoname'];
@@ -99,14 +192,10 @@ function generatePopupTable(geoname, geoobject) {
     }
     var replacementData = {
         "geoname": geonameName,
-        "name_translation_ru": geoname.fields['name_translation_ru'],
-        "name_translation_en": geoname.fields['name_translation_en'],
-        "geotype": geotype,
-        "geolanguage": geolanguage
+        "geotype": geotype
     };
-    return replaceMe(POPUP_TABLES[currentLanguage], replacementData);
+    return replaceMe(POPUP_MAP_TABLE_ROW, replacementData);
 }
-
 
 //https://stackoverflow.com/questions/377961/efficient-javascript-string-replacement
 function replaceMe(template, data) {
@@ -138,17 +227,35 @@ const POPUP_TABLES = ["<table class='column-bordered-table'>" +
     "<tr><td class='table-rubric'>Язык</td><td class='table-data'>{geolanguage}</td></tr>" +
     "<tr><td class='table-rubric'>Перевод</td><td class='table-data'>{name_translation_ru}</td></tr>" +
     "<tr><td class='table-rubric'>Этимология</td><td class='table-data'>TODO</td></tr>" +
-    "<tr><td class='table-rubric'>Источник</td><td class='table-data'>TODO</td></tr>" +
+    "<tr><td class='table-rubric'>Источник</td><td class='table-data table-comment'>{map_description}</td></tr>" +
+    "<tr><td class='table-rubric'></td><td><div class='show-all-markers' id='{map_id}'>Показать всю карту</div></td></tr>" +
     "</table>",
+
     "<table class='column-bordered-table'>" +
     "<tr><td class='table-rubric'>Toponym</td><td class='table-data'>{geoname}</td></tr>" +
     "<tr><td class='table-rubric'>Type</td><td class='table-data'>{geotype}</td></tr>" +
     "<tr><td class='table-rubric'>Language</td><td class='table-data'>{geolanguage}</td></tr>" +
     "<tr><td class='table-rubric'>Translation</td><td class='table-data'>{name_translation_en}</td></tr>" +
     "<tr><td class='table-rubric'>Etymology</td><td class='table-data'>TODO</td></tr>" +
-    "<tr><td class='table-rubric'>Source</td><td class='table-data'>TODO</td></tr>" +
+   "<tr><td class='table-rubric'>Source</td><td class='table-data table-comment'>{map_description}</td></tr>" +
+    "<tr><td class='table-rubric'></td><td><div class='show-all-markers' id='{map_id}'>Show the whole map</div></td></tr>" +
     "</table>"
 ]
+
+
+const POPUP_MAP_TABLES = ["<table class='column-bordered-table'>" +
+                           "<tr><th class='table-data-first-column'>Тип</th><th class='table-data'>Название</th</tr>",
+
+                           "<table class='column-bordered-table'>" +
+                           "<tr><th class='table-data-first-column'>Type</th><th class='table-data'>Title</th></tr>"
+]
+
+const POPUP_MAP_TABLE_ROW = "<tr><td class='table-data-first-column'>{geotype}</td><td class='table-data'>{geoname}</td></tr>"
+const POPUP_MAP_TABLE_ROW_LAST = [ "<tr><td class='table-rubric'></td><td><div class='refresh-all-markers'>Вернуться к просмотру</div></td></tr></table>" ,
+                        "<tr><td class='table-rubric'></td><td><div class='refresh-all-markers'>Return to the common view</div></td></tr></table>"]
+
+const POPUP_MAP_TABLE_ROW_IMAGE = ["<tr><td colspan='2'><a href='{image_link}' target='_blank'><img width='500' src='{image_link}' alt='Карта'/></a></td></tr>",
+                                    "<tr><td colspan='2'><a href='{image_link}' target='_blank'><img width='500' src='{image_link}' alt='Map'/></a></td></tr>"];
 
 const RULER_OPTIONS = [{
         position: 'bottomleft',
