@@ -111,7 +111,6 @@ function fillInObject(geoname, geoobject, geomap) {
 
 
 function generatePopupTable(geoname, geoobject, geomap) {
-    console.log(geoobject.fields['geotype_id']);
     var geotype = getGeotypeById(geoobject.fields['geotype_id']);
     var geolanguage = getLanguageById(geoname.fields['language_id']);
     var geonameName = geoname.fields['geoname'];
