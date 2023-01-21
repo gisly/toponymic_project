@@ -30,7 +30,7 @@ function initializeMap() {
         maxZoom: 18,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
-    map.addLayer(customTiles);
+    map.addLayer(osmTiles);
     L.control.scale().addTo(map);
     addRulerToMap(map);
 }
