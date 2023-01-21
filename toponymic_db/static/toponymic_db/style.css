@@ -1,9 +1,6 @@
 .geo-feature{
     background-color: #f6f6f6;
 }
-.table_rubric{
-    font-weight: bold;
-}
 #toponymic_db{
     display: none
 }
@@ -12,6 +9,7 @@
 .column-bordered-table {
   white-space: nowrap;
   width: 100%;
+  border-collapse: collapse;
 }
 
 
@@ -22,4 +20,10 @@
 
 .column-bordered-table td.table-data {
     border-left: 1px solid #c3c3c3;
+    padding : 10px;
+}
+
+.column-bordered-table td.table-rubric {
+    padding : 10px;
+    font-weight: bold;
 }

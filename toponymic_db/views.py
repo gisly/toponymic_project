@@ -45,16 +45,4 @@ class DetailView(generic.DetailView):
     template_name = 'toponymic_db/detail.html'
 
 
-"""
-class GeoObjectsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GeoObjects
-        fields = '__all__'
 
-
-class GeoNamesForListSerializer(serializers.ModelSerializer):
-    geoobject = GeoObjectsSerializer()
-    class Meta:
-        model = GeoNames
-        fields = ['geoname', 'geoobject']
-"""
