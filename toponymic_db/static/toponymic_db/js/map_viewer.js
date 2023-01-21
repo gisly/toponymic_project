@@ -114,6 +114,7 @@ function generatePopupTable(geoname, geoobject, geomap) {
     var geotype = getGeotypeById(geoobject.fields['geotype_id']);
     var geolanguage = getLanguageById(geoname.fields['language_id']);
     var geonameName = geoname.fields['geoname'];
+    console.log(geomap);
     if (isLatinScript(currentLanguage)) {
         geonameName = transliterate(geonameName);
     }
