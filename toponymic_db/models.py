@@ -58,8 +58,8 @@ class Persons(models.Model):
 
 class Maps(models.Model):
     map_id = models.AutoField(primary_key=True)
-    area_name_ru = models.CharField(max_length=200, unique=True, null=False)
-    area_name_en = models.CharField(max_length=200, unique=True, null=False)
+    area_name_ru = models.CharField(max_length=500, unique=True, null=False)
+    area_name_en = models.CharField(max_length=500, unique=True, null=False)
     author_id = models.ForeignKey(Persons, on_delete=models.SET_NULL, null=True, blank=True, related_name='%(class)s_author')
     collector_id = models.ForeignKey(Persons, on_delete=models.SET_NULL, null=True, blank=True, related_name='%(class)s_collector')
     date_collected = models.DateField(null=True, blank=True)
