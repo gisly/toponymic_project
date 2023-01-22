@@ -25,12 +25,12 @@ function initializeMap() {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
-    const customTiles = L.tileLayer('http://195.133.49.241/hot/{z}/{x}/{y}.png', {
+    const customTiles = L.tileLayer('http://toponymics-live.net/hot/{z}/{x}/{y}.png', {
         id: 'LPR',
         maxZoom: 18,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
-    map.addLayer(osmTiles);
+    map.addLayer(customTiles);
     L.control.scale().addTo(map);
     addRulerToMap(map);
 }
