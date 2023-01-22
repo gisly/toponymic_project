@@ -51,9 +51,10 @@ class GeoObjectsAdmin(admin.ModelAdmin):
 
 class GeoNamesAdmin(admin.ModelAdmin):
     list_display = ('geoname', 'name_translation_ru', 'name_translation_en', 'motivation_comment',
-                    'linguistic_means', 'language_id', 'geoobject_id', 'source_id', 'motivation_id')
+                    'linguistic_means', 'language_id', 'geoobject_id', 'source_id', 'motivation_id', 'map_id')
     search_fields = ['geoname', 'name_translation_ru', 'name_translation_en', 'motivation_comment',
-                     'linguistic_means', 'language_id', 'geoobject_id', 'source_id', 'motivation_id']
+                     'linguistic_means', 'language_id__language_name_ru', 'source_id__source_full_description',
+                     'motivation_id__motivation_short_name_ru', 'map_id__area_name_ru']
 
 
 class PersonsAdmin(admin.ModelAdmin):
