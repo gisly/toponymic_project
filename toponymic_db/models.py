@@ -71,6 +71,8 @@ class Maps(models.Model):
     comment_collected_ru = models.TextField(null=True, blank=True)
     comment_collected_en = models.TextField(null=True, blank=True)
 
+    is_archive = models.BooleanField(null=False, blank=False, default=False)
+
     def __str__(self):
         return self.area_name_en
 

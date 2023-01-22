@@ -16,7 +16,7 @@ var currentLanguage = 0;
 
 var markers = [];
 var markersApproximate = [];
-var markersByMapId = new Object();
+var geonamesByMapId = new Object();
 var markersApproximateByMapId = new Object();
 var geonamesApproximateByMapId = new Object();
 
@@ -35,7 +35,7 @@ function initializeMap() {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
-    const customTiles = L.tileLayer('http://toponymics-live.net/hot/{z}/{x}/{y}.png', {
+    const customTiles = L.tileLayer('https://toponymics-live.net/hot/{z}/{x}/{y}.png', {
         id: 'LPR',
         maxZoom: 18,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -60,10 +60,10 @@ function fillInPreciseObjects(){
         var geomap = geomaps[i];
         var geomapId = geomap.pk;
         if (!!geomapId){
-            if(geomapId in markersByMapId){
-                markersByMapId[geomapId].push(i);
+            if(geomapId in geonamesByMapId){
+                geonamesByMapId[geomapId].push(i);
             } else {
-                markersByMapId[geomapId] = [i];
+                geonamesByMapId[geomapId] = [i];
             }
 
         }
@@ -78,7 +78,7 @@ function fillInApproximateObjects(){
         var geoobject = geoobjects_approximate[i];
         var geomap = geomaps_approximate[i];
         var geomapId = geomap.pk;
-        if (!!geomapId ){
+        if (!!geomapId && !(geomapId in geonamesByMapId)){
             if(geomapId in geonamesApproximateByMapId){
                 geonamesApproximateByMapId[geomapId].push(i);
             } else {
@@ -113,7 +113,7 @@ function refreshPopups() {
         var geoobject = geoobjects[i];
         var geomap = geomaps[i];
         var marker = markers[i];
-        marker .setStyle({color: "red", radius: 7, fillColor: "red", fillOpacity: "0.2"});
+        marker .setStyle({color: getColorByMapType(geomap.fields.is_archive), radius: 7, fillColor: getColorByMapType(geomap.fields.is_archive), fillOpacity: "0.2"});
         marker.bindPopup(generatePopupTable(geoname, geoobject, geomap), {
             maxWidth: 1000
         });
@@ -136,7 +136,7 @@ function fillInObject(geoname, geoobject, geomap) {
     var longitude = geoobject.fields['longitude']
     var marker = new L.CircleMarker([latitude, longitude], {
         radius: 7,
-        color: "red"
+        color: getColorByMapType(geomap.fields.is_archive)
     });
     marker.addTo(map);
     marker.bindPopup(generatePopupTable(geoname, geoobject, geomap), {
@@ -145,6 +145,7 @@ function fillInObject(geoname, geoobject, geomap) {
 
     if(!!geomap.pk){
         marker.mapId = geomap.pk;
+        console.log(geomap);
     }
     latLngs.push([latitude, longitude]);
     markers.push(marker);
@@ -208,7 +209,7 @@ function initializeActionsOnMarkers(){
    $("div#map").on("click", '.show-all-markers', function (e) {
         var currentMapId = e.target.id;
         if(!!currentMapId){
-            var markerIdsFromThisMap = markersByMapId[currentMapId];
+            var markerIdsFromThisMap = geonamesByMapId[currentMapId];
             markerIdsFromThisMap.forEach(function(markerId){
                 markers[markerId].setStyle({color: "black", fillColor: "#FDBE02", fillOpacity: "1", radius: 10});
                 markers[markerId].bindPopup(generateMapPopupTable(currentMapId), {maxWidth: 1000});
@@ -228,7 +229,7 @@ function initializeActionsOnMarkers(){
 
 function generateMapPopupTable(currentMapId){
     var table = POPUP_MAP_TABLES[currentLanguage];
-    var idsByMapId = markersByMapId[currentMapId];
+    var idsByMapId = geonamesByMapId[currentMapId];
     idsByMapId.forEach(function(idFromMap){
         table += generateMapPopupTableRow(idFromMap);
     })
@@ -412,6 +413,14 @@ function transliterate(word) {
 
 function isLatinScript(currentLanguage) {
     return currentLanguage > 0;
+}
+
+function getColorByMapType(isArchive){
+    console.log(isArchive);
+    if(isArchive){
+        return "blue";
+    }
+    return "red";
 }
 
 const GEOTYPES = {
