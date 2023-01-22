@@ -87,10 +87,7 @@ function fillInApproximateObjects(){
             }
         }
     }
-    for (let mapId in markersApproximateByMapId) {
-        let markerAppoximate = markersApproximateByMapId[mapId];
-        markerAppoximate.bindPopup(generateApproximateMapPopupTable(mapId), {maxWidth: 1000});
-    }
+    refreshApproximatePopups();
 }
 
 function initializeUtils() {
@@ -101,6 +98,7 @@ function initializeUtils() {
         }
         $(this).html(LANGUAGES[currentLanguage]);
         refreshPopups();
+        refreshApproximatePopups();
         switchMenu();
     });
 
@@ -119,6 +117,13 @@ function refreshPopups() {
         marker.bindPopup(generatePopupTable(geoname, geoobject, geomap), {
             maxWidth: 1000
         });
+    }
+}
+
+function refreshApproximatePopups(){
+    for (let mapId in markersApproximateByMapId) {
+        let markerAppoximate = markersApproximateByMapId[mapId];
+        markerAppoximate.bindPopup(generateApproximateMapPopupTable(mapId), {maxWidth: 1000});
     }
 }
 
@@ -340,8 +345,8 @@ const POPUP_TABLES = ["<table class='column-bordered-table'>" +
 const POPUP_MAP_TABLES = ["<table class='column-bordered-table'><tbody class='scrollable'>" +
                            "<tr><th class='table-data-first-column'>Номер на карте</th><th class='table-data'>Тип</th><th class='table-data'>Название</th></tr>",
 
-                           "<table class='column-bordered-table'><tbody class='scrollable>" +
-                           "<tr><th class='table-data-first-column'>Number on the map</th><th class='table-data'>Type</th><th class='table-data'>Title</th></tr>"
+                           "<table class='column-bordered-table'><tbody class='scrollable'>" +
+                            "<tr><th class='table-data-first-column'>Number</th><th class='table-data'>Type</th><th class='table-data'>Title</th></tr>"
 ]
 
 const POPUP_MAP_TABLE_ROW = "<tr><td class='table-data-first-column'>{number_on_map}</td><td class='table-data'>{geotype}</td><td class='table-data'>{geoname}</td></tr>"
