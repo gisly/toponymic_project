@@ -1,6 +1,13 @@
 var geonames;
 var geoobjects;
 var geomaps;
+
+var geonames_approximate;
+var geoobjects_approximate;
+var geomaps_approximate;
+
+
+
 var latLngs = Array();
 var map;
 var ruler;
@@ -8,7 +15,10 @@ var currentLanguage = 0;
 
 
 var markers = [];
+var markersApproximate = [];
 var markersByMapId = new Object();
+var markersApproximateByMapId = new Object();
+var geonamesApproximateByMapId = new Object();
 
 $(document).ready(function() {
     initializeMap();
@@ -35,8 +45,15 @@ function initializeMap() {
     addRulerToMap(map);
 }
 
-
 function fillInObjects() {
+    fillInPreciseObjects();
+    fillInApproximateObjects();
+    initializeActionsOnMarkers();
+    var bounds = new L.LatLngBounds(latLngs);
+    map.fitBounds(bounds);
+}
+
+function fillInPreciseObjects(){
     for (let i = 0; i < geonames.length; i++) {
         var geoname = geonames[i];
         var geoobject = geoobjects[i];
@@ -52,9 +69,28 @@ function fillInObjects() {
         }
         fillInObject(geoname, geoobject, geomap)
     }
-    initializeActionsOnMarkers();
-    var bounds = new L.LatLngBounds(latLngs);
-    map.fitBounds(bounds);
+}
+
+
+function fillInApproximateObjects(){
+    for (let i = 0; i < geonames_approximate.length; i++) {
+        var geoname = geonames_approximate[i];
+        var geoobject = geoobjects_approximate[i];
+        var geomap = geomaps_approximate[i];
+        var geomapId = geomap.pk;
+        if (!!geomapId ){
+            if(geomapId in geonamesApproximateByMapId){
+                geonamesApproximateByMapId[geomapId].push(i);
+            } else {
+                geonamesApproximateByMapId[geomapId] = [i];
+                fillInApproximateObject(geomap);
+            }
+        }
+    }
+    for (let mapId in markersApproximateByMapId) {
+        let markerAppoximate = markersApproximateByMapId[mapId];
+        markerAppoximate.bindPopup(generateApproximateMapPopupTable(mapId), {maxWidth: 1000});
+    }
 }
 
 function initializeUtils() {
@@ -109,12 +145,36 @@ function fillInObject(geoname, geoobject, geomap) {
     markers.push(marker);
 }
 
+function fillInApproximateObject(geomap) {
+    var geomapId = geomap.pk;
+    var latitude = parseFloat(geomap.fields['map_latitude']);
+    var longitude = parseFloat(geomap.fields['map_longitude']);
+    var latitude1 = latitude + APPROXIMATE_RADIUS_X;
+    var longitude1 = longitude + APPROXIMATE_RADIUS_Y;
+
+    var latitude2 = latitude + APPROXIMATE_RADIUS_X;
+    var longitude2 = longitude - APPROXIMATE_RADIUS_Y;
+
+    var latitude3 = latitude - APPROXIMATE_RADIUS_X;
+    var longitude3 = longitude - APPROXIMATE_RADIUS_Y;
+
+    var latitude4 = latitude - APPROXIMATE_RADIUS_X;
+    var longitude4 = longitude + APPROXIMATE_RADIUS_Y;
+
+    var latlngs = [[latitude1, longitude1],[latitude2, longitude2],[latitude3, longitude3],[latitude4, longitude4]];
+
+    var polygon = L.polygon(latlngs, {color: 'blue'}).addTo(map);
+    polygon.bindPopup("AAAA");
+    latLngs.push([latitude, longitude]);
+    markersApproximate.push(polygon);
+    markersApproximateByMapId[geomapId] = polygon;
+}
+
 
 function generatePopupTable(geoname, geoobject, geomap) {
     var geotype = getGeotypeById(geoobject.fields['geotype_id']);
     var geolanguage = getLanguageById(geoname.fields['language_id']);
     var geonameName = geoname.fields['geoname'];
-    console.log(geomap);
     if (isLatinScript(currentLanguage)) {
         geonameName = transliterate(geonameName);
     }
@@ -179,9 +239,44 @@ function generateMapPopupTable(currentMapId){
     return table;
 }
 
+function generateApproximateMapPopupTable(currentMapId){
+    var table = POPUP_MAP_TABLES[currentLanguage];
+    var idsByMapId = geonamesApproximateByMapId[currentMapId];
+    idsByMapId.forEach(function(idFromMap){
+        table += generateApproximateMapPopupTableRow(idFromMap);
+    })
+    //add a picture of the map if exists
+    var geomap = geomaps_approximate[idsByMapId[0]];
+    if(!!geomap.fields.image_link){
+        var replacementData = {
+            "image_link": geomap.fields.image_link
+        };
+        table +=  replaceMe(POPUP_MAP_TABLE_ROW_IMAGE[currentLanguage], replacementData);
+    }
+    table += "</table>";
+    return table;
+}
+
 function generateMapPopupTableRow(idFromMap){
     var geoobject = geoobjects[idFromMap];
     var geoname = geonames[idFromMap];
+    var geotype = getGeotypeById(geoobject.fields['geotype_id']);
+    var geolanguage = getLanguageById(geoname.fields['language_id']);
+    var geonameName = geoname.fields['geoname'];
+    if (isLatinScript(currentLanguage)) {
+        geonameName = transliterate(geonameName);
+    }
+    var replacementData = {
+        "geoname": geonameName,
+        "geotype": geotype,
+        "number_on_map": geoname.fields['number_on_map']
+    };
+    return replaceMe(POPUP_MAP_TABLE_ROW, replacementData);
+}
+
+function generateApproximateMapPopupTableRow(idFromMap){
+    var geoobject = geoobjects_approximate[idFromMap];
+    var geoname = geonames_approximate[idFromMap];
     var geotype = getGeotypeById(geoobject.fields['geotype_id']);
     var geolanguage = getLanguageById(geoname.fields['language_id']);
     var geonameName = geoname.fields['geoname'];
@@ -414,4 +509,7 @@ var TRANSLITERATION_TABLE = {
 };
 
 
-MENU_LIST_VIEW = ["Список", "List"]
+const MENU_LIST_VIEW = ["Список", "List"]
+
+const APPROXIMATE_RADIUS_Y = 0.4;
+const APPROXIMATE_RADIUS_X = 0.2;

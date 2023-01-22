@@ -15,11 +15,21 @@ class IndexView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         geonames = GeoNames.objects.select_related('source_id', 'motivation_id', 'geoobject_id', 'map_id').exclude(
             geoobject_id__latitude=0).order_by('geoname_id')
-        print(geonames.query)
+
         context = super(IndexView, self).get_context_data(**kwargs)
         context['geonames'] = serializers.serialize('json', geonames)
         context['geoobjects'] = serializers.serialize('json', [geoname.geoobject_id for geoname in geonames])
         context['geomaps'] = serializers.serialize('json', [geoname.map_id if geoname.map_id is not None else Maps() for geoname in geonames if geoname ])
+
+        geonames_approximate = GeoNames.objects.select_related('source_id', 'motivation_id', 'geoobject_id', 'map_id').filter(
+            geoobject_id__latitude=0).exclude(map_id__map_latitude__isnull=True).order_by('geoname_id')
+
+        print(geonames_approximate.query)
+        context['geonames_approximate'] = serializers.serialize('json', geonames_approximate)
+        context['geoobjects_approximate'] = serializers.serialize('json', [geoname_approximate.geoobject_id for geoname_approximate in geonames_approximate])
+        context['geomaps_approximate'] = serializers.serialize('json',
+                                                   [geoname_approximate.map_id if geoname_approximate.map_id is not None else Maps() for geoname_approximate
+                                                    in geonames_approximate if geoname_approximate])
         return context
 
 

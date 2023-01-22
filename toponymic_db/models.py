@@ -65,6 +65,8 @@ class Maps(models.Model):
     date_collected = models.DateField(null=True, blank=True)
     place_collected = models.TextField(null=True, blank=True)
     image_link = models.URLField(null=True, blank=True)
+    map_latitude = models.DecimalField(unique=False, max_digits=9, decimal_places=6, null=True, blank=True)
+    map_longitude = models.DecimalField(unique=False, max_digits=9, decimal_places=6, null=True, blank=True)
 
     def __str__(self):
         return self.area_name_en

@@ -30,7 +30,7 @@ class GeoTypesAdmin(admin.ModelAdmin):
 
 
 class MapsAdmin(admin.ModelAdmin):
-    list_display = ('area_name_ru', 'area_name_en',)
+    list_display = ('area_name_ru', 'area_name_en', 'map_latitude', 'map_longitude')
     search_fields = ['area_name_ru', 'area_name_en']
 
 
