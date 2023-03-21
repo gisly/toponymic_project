@@ -32,6 +32,8 @@ class MotivationTypes(models.Model):
 
 class GeoTypes(models.Model):
     geotype_id = models.AutoField(primary_key=True)
+    geotype_language = models.CharField(max_length=100, unique=True, null=False)
+    language_id = models.ForeignKey(Language,on_delete=models.SET_NULL, null=True, blank=True, related_name='%(class)s_id')
     geotype_ru = models.CharField(max_length=100, unique=True, null=False)
     geotype_en = models.CharField(max_length=100, unique=True, null=False)
     geotype_description_ru = models.CharField(max_length=1000, unique=True, null=False)

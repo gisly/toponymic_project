@@ -23,9 +23,9 @@ class MotivationTypesAdmin(admin.ModelAdmin):
 
 
 class GeoTypesAdmin(admin.ModelAdmin):
-    list_display = ('geotype_ru', 'geotype_en',
+    list_display = ('geotype_ru', 'geotype_en', 'geotype_id', 'geotype_language',
                     'geotype_description_ru', 'geotype_description_en')
-    search_fields = ['geotype_ru', 'geotype_en',
+    search_fields = ['geotype_ru', 'geotype_en', 'geotype_id', 'geotype_language',
                      'geotype_description_ru', 'geotype_description_en']
 
 

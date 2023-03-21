@@ -4,7 +4,7 @@ from django.core import serializers
 from django.db.models import Count
 from django.shortcuts import render
 from django.views import generic
-from .models import GeoNames, GeoObjects, Maps
+from .models import GeoNames, GeoObjects, Maps, GeoTypes
 from .models import MotivationTypes
 
 
@@ -30,6 +30,9 @@ class IndexView(generic.TemplateView):
         context['geomaps_approximate'] = serializers.serialize('json',
                                                    [geoname_approximate.map_id if geoname_approximate.map_id is not None else Maps() for geoname_approximate
                                                     in geonames_approximate if geoname_approximate])
+        
+        geotypes = GeoTypes.objects.select_related('language_id').order_by('geotype_id')
+        context['geotypes'] = serializers.serialize('json',geotypes)
         return context
 
 
