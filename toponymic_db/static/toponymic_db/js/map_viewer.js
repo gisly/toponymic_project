@@ -1,6 +1,7 @@
 var geonames;
 var geoobjects;
 var geomaps;
+var geotypes;
 
 var geonames_approximate;
 var geoobjects_approximate;
@@ -24,7 +25,24 @@ $(document).ready(function() {
     initializeMap();
     fillInObjects();
     initializeUtils();
+    getSavedLanguage()
 });
+
+function getSavedLanguage(){
+    if(localStorage.getItem('language_id')!=null && Number.parseInt(localStorage.getItem('language_id')) != null)
+       setLanguage(Number.parseInt(localStorage.getItem('language_id')))
+}
+
+function getGeoTypeFromGeoObject(geoobject){
+    let output
+    geotypes.forEach((geotype) =>{
+        if(geotype.pk==geoobject.fields.geotype_id){
+            output = geotype;
+            return;
+        }
+    });
+    return output;
+}
 
 
 
@@ -67,7 +85,7 @@ function fillInPreciseObjects(){
             }
 
         }
-        fillInObject(geoname, geoobject, geomap)
+        fillInObject(geoname, geoobject, geomap);
     }
 }
 
@@ -90,16 +108,20 @@ function fillInApproximateObjects(){
     refreshApproximatePopups();
 }
 
+function setLanguage(languageNumber){
+    if (languageNumber >= LANGUAGES.length) currentLanguage = 0;
+    else currentLanguage=languageNumber;
+    $("#languageSwitcher").html(LANGUAGES[currentLanguage]);//update switcher button
+    refreshPopups();
+    refreshApproximatePopups();
+    switchMenu();
+}
+
 function initializeUtils() {
     $("#languageSwitcher").click(function() {
-        currentLanguage += 1;
-        if (currentLanguage >= LANGUAGES.length) {
-            currentLanguage = 0;
-        }
-        $(this).html(LANGUAGES[currentLanguage]);
-        refreshPopups();
-        refreshApproximatePopups();
-        switchMenu();
+        setLanguage(currentLanguage+1);//update language in backend
+        $(this).html(LANGUAGES[currentLanguage]);//update switcher button
+        localStorage.setItem('language_id',currentLanguage);//update local storage
     });
 
     $("#listView").click(function() {
@@ -178,7 +200,8 @@ function fillInApproximateObject(geomap) {
 
 
 function generatePopupTable(geoname, geoobject, geomap) {
-    var geotype = getGeotypeById(geoobject.fields['geotype_id']);
+    // var geotype = getGeotypeById(geoobject.fields['geotype_id']);
+    var geotype = getGeoTypeFromGeoObject(geoobject)
     var geolanguage = getLanguageById(geoname.fields['language_id']);
     var geonameName = geoname.fields['geoname'];
     if (isLatinScript(currentLanguage)) {
@@ -193,7 +216,9 @@ function generatePopupTable(geoname, geoobject, geomap) {
         "geoname": geonameName,
         "name_translation_ru": geoname.fields['name_translation_ru'],
         "name_translation_en": geoname.fields['name_translation_en'],
-        "geotype": geotype,
+        "geotype_en": geotype?.fields.geotype_en,
+        "geotype_ru": geotype?.fields.geotype_ru,
+        "geotype_language": geotype?.fields.geotype_language,
         "geolanguage": geolanguage,
         "map_description": mapDescription,
         "map_id": geomap.pk
@@ -317,13 +342,18 @@ function getGeotypeById(geotypeId) {
     return GEOTYPES[geotypeId][currentLanguage];
 }
 
+function getGeoTypeObj(geottypeId){
+}
+
 function getLanguageById(langugeId) {
     return GEOLANGUAGES[langugeId][currentLanguage];
 }
 
 const POPUP_TABLES = ["<table class='column-bordered-table'>" +
     "<tr><td class='table-rubric'>Топоним</td><td class='table-data'>{geoname}</td></tr>" +
-    "<tr><td class='table-rubric'>Тип</td><td class='table-data'>{geotype}</td></tr>" +
+    // "<tr><td class='table-rubric'>Тип</td><td class='table-data'>{geotype}</td></tr>" +
+    "<tr><td class='table-rubric'>Тип</td><td class='table-data'>{geotype_ru}</td></tr>" +
+    "<tr><td class='table-rubric'>Тип ({geolanguage})</td><td class='table-data'>{geotype_language}</td></tr>" +
     "<tr><td class='table-rubric'>Язык</td><td class='table-data'>{geolanguage}</td></tr>" +
     "<tr><td class='table-rubric'>Перевод</td><td class='table-data'>{name_translation_ru}</td></tr>" +
     "<tr><td class='table-rubric'>Этимология</td><td class='table-data'>TODO</td></tr>" +
@@ -333,7 +363,9 @@ const POPUP_TABLES = ["<table class='column-bordered-table'>" +
 
     "<table class='column-bordered-table'>" +
     "<tr><td class='table-rubric'>Toponym</td><td class='table-data'>{geoname}</td></tr>" +
-    "<tr><td class='table-rubric'>Type</td><td class='table-data'>{geotype}</td></tr>" +
+    // "<tr><td class='table-rubric'>Type</td><td class='table-data'>{geotype}</td></tr>" +
+    "<tr><td class='table-rubric'>Type</td><td class='table-data'>{geotype_en}</td></tr>" +
+    "<tr><td class='table-rubric'>Type ({geolanguage})</td><td class='table-data'>{geotype_language}</td></tr>" +
     "<tr><td class='table-rubric'>Language</td><td class='table-data'>{geolanguage}</td></tr>" +
     "<tr><td class='table-rubric'>Translation</td><td class='table-data'>{name_translation_en}</td></tr>" +
     "<tr><td class='table-rubric'>Etymology</td><td class='table-data'>TODO</td></tr>" +
