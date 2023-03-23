@@ -218,7 +218,7 @@ function generatePopupTable(geoname, geoobject, geomap) {
         "name_translation_en": geoname.fields['name_translation_en'],
         "geotype_en": geotype?.fields.geotype_en,
         "geotype_ru": geotype?.fields.geotype_ru,
-        "geotype_language": geotype?.fields.geotype_language,
+        "geotype_language": transliterate(geotype?.fields.geotype_language),
         "geolanguage": geolanguage,
         "map_description": mapDescription,
         "map_id": geomap.pk
@@ -438,6 +438,7 @@ const RULER_OPTIONS = [{
 ]
 
 function transliterate(word) {
+    if(word==null) return
     return word.split('').map(function(char) {
         return TRANSLITERATION_TABLE[char] || char;
     }).join("");
@@ -551,7 +552,9 @@ var TRANSLITERATION_TABLE = {
     "т": "t",
     "ь": "'",
     "б": "b",
-    "ю": "yu"
+    "ю": "yu",
+    "Ӈ": "Ng",
+    "ӈ": "ng",
 };
 
 
