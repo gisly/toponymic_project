@@ -167,7 +167,6 @@ function fillInObject(geoname, geoobject, geomap) {
 
     if(!!geomap.pk){
         marker.mapId = geomap.pk;
-        console.log(geomap);
     }
     latLngs.push([latitude, longitude]);
     markers.push(marker);
@@ -448,7 +447,6 @@ function isLatinScript(currentLanguage) {
 }
 
 function getColorByMapType(isArchive){
-    console.log(isArchive);
     if(isArchive){
         return "blue";
     }
