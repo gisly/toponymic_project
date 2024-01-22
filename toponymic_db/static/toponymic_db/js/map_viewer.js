@@ -60,7 +60,7 @@ function initializeMap() {
     });
     map.addLayer(customTiles);
     L.control.scale().addTo(map);
-    //addRulerToMap(map);
+    addRulerToMap(map);
 }
 
 function fillInObjects() {
